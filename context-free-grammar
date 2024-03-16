@@ -1,0 +1,27 @@
+// A program is a list of statements, these two
+// types are linked by the (expr ';') statement.
+// Both statements and expressions can be parsed
+// using recursive descent algorithm.
+
+// Statements (expressions that don't evaluate)
+program -> stmt*
+stmt -> decl | if | while | block | func | expr ';'
+decl -> 'let' NAME '=' expr ';'
+if -> 'if' expr stmt ('else' stmt)*
+for -> 'for' expr ';' expr ';' expr ';' stmt
+while -> 'while' expr stmt
+block -> '{' (stmt)* '}'
+func -> 'fn' NAME (NAME)* block
+
+// Expressions (expressions that evaluate)
+expr -> assignment
+assignment -> NAME '=' assignment | logicalor
+logicalor -> logicaland 'or' logicaland
+logicaland -> equality 'and' equality
+equality -> comparison
+comparison -> term ('<' | '>' | '<=' | '>=' term)*
+term -> factor ('+' | '-' factor)*
+factor -> unary ('*' | '/' unary)*
+unary -> (! | -)* terminal
+terminal -> (DOUBLE | STRING | NAME | groupexpr)
+groupexpr -> '(' expr ')'
