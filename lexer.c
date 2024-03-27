@@ -16,6 +16,7 @@ static char *keywords[] = {
     "true",
     "false",
     "fn",
+    "return",
 };
 
 static const size_t keywords_size = (sizeof(keywords) / sizeof(char *));
@@ -123,6 +124,8 @@ TokenType get_keyword(char *name)
         return T_FALSE;
     } else if (strcmp(name, "fn") == 0) {
         return T_FN;
+    } else if (strcmp(name, "return") == 0) {
+        return T_RETURN;
     } else { // Unexpected
         printf("No keyword enum matches string\n");
         exit(1);
@@ -332,6 +335,11 @@ void get_tokens(Lexer *l)
     }
 }
 
+double get_ddata(Token t)
+{
+    return ((double *)t.data)[0];
+}
+
 void print_token(Token t)
 {
     switch (t.type) {
@@ -377,6 +385,7 @@ void print_token(Token t)
         case T_TRUE:printf("true");break;
         case T_FALSE:printf("false");break;
         case T_FN:printf("fn");break;
+        case T_RETURN:printf("return");break;
         default:
             printf("unk");
             break;

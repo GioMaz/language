@@ -51,11 +51,6 @@ Token eval_unexpr(UnExpr unexpr, Env *env)
     }
 }
 
-double get_ddata(Token t)
-{
-    return ((double *)t.data)[0];
-}
-
 Token eval_binexpr(BinExpr binexpr, Env *env)
 {
     Token lt = eval_expr(binexpr.lexpr, env);
@@ -87,9 +82,7 @@ Token eval_binexpr(BinExpr binexpr, Env *env)
         break;
     case T_LESS: {
         double ltd = get_ddata(lt);
-        // printf("%f\n", ltd);
         double rtd = get_ddata(rt);
-        // printf("%f\n", rtd);
         Token res = ltd < rtd
             ? make_token(T_TRUE)
             : make_token(T_FALSE);
@@ -220,6 +213,14 @@ void eval_exprstmt(ExprStmt exprstmt, Env *env)
     // print_token(value);
 }
 
+void eval_retstmt(RetStmt retstmt, Env *env)
+{
+    Token value = eval_expr(retstmt.expr, env);
+    exit(get_ddata(value));
+    // print_token(value);
+    // print_token(value);
+}
+
 void eval_stmt(Stmt stmt, Env *env)
 {
     // print_stmt(stmt);
@@ -242,6 +243,9 @@ void eval_stmt(Stmt stmt, Env *env)
         break;
     case S_EXPR:
         eval_exprstmt(stmt.as->exprstmt, env);
+        break;
+    case S_RET:
+        eval_retstmt(stmt.as->retstmt, env);
         break;
     default:
         printf("Statement '");

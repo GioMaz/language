@@ -47,6 +47,7 @@ typedef enum {
     T_TRUE,         // true
     T_FALSE,        // false
     T_FN,           // fn
+    T_RETURN,       // return
 } TokenType;
 
 typedef struct {
@@ -84,6 +85,7 @@ char *get_name(Lexer *l);
 Token make_name(char *string);
 bool get_token(Lexer *l);
 void get_tokens(Lexer *l);
+double get_ddata(Token t);
 void print_token(Token t);
 void print_tokens(Lexer *l);
 

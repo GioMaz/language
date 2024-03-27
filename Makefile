@@ -1,19 +1,19 @@
 CC=gcc
-# CFLAGS=-Wall
+CFLAGS= $$(llvm-config --cflags --ldflags --libs core)
 
-all: interpreter analyzer
+all: interpreter codegen
 
 interpreter: interpreter.o parser.o lexer.o
 	$(CC) $(CFLAGS) -o interpreter interpreter.o parser.o lexer.o
 
-analyzer : analyzer.o parser.o lexer.o
-	$(CC) $(CFLAGS) -o analyzer analyzer.o parser.o lexer.o
+codegen: codegen.o analyzer.o parser.o lexer.o
+	$(CC) $(CFLAGS) -o codegen codegen.o analyzer.o parser.o lexer.o
 
-#run: analyzer
-#	./analyzer
+#run: interpreter
+#	./interpreter code.l
 
-run: interpreter
-	./interpreter code.l
+run: codegen
+	./codegen code.l
 
 clean:
 	rm -rf *.o interpreter analyzer

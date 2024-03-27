@@ -10,8 +10,9 @@ decl -> 'let' NAME '=' expr ';'
 if -> 'if' expr stmt ('else' stmt)*
 for -> 'for' expr ';' expr ';' expr ';' stmt
 while -> 'while' expr stmt
-block -> '{' (stmt)* '}'
 func -> 'fn' NAME (NAME)* block
+ret -> 'return' NAME
+block -> '{' (stmt)* '}'
 
 // Expressions (expressions that evaluate)
 expr -> assignment

@@ -449,6 +449,19 @@ Stmt make_exprstmt(Expr expr)
     return stmt_new;
 }
 
+Stmt make_retstmt(Expr expr)
+{
+    AnyStmt *as = malloc(sizeof(AnyStmt));
+    as->retstmt.expr = expr;
+
+    Stmt stmt_new = {
+        .type = S_RET,
+        .as = as,
+    };
+
+    return stmt_new;
+}
+
 Stmt parse_exprstmt(Parser *p)
 {
     Expr expr = parse_expr(p);
@@ -460,6 +473,25 @@ Stmt parse_exprstmt(Parser *p)
     }
     p->pos++;
     return exprstmt;
+}
+
+Stmt parse_retstmt(Parser *p)
+{
+    if (is_token(p, T_RETURN)) {
+        p->pos++;
+        Expr expr = parse_expr(p);
+        Stmt retstmt = make_retstmt(expr);
+        if (!is_token(p, T_SEMICOLON)) {
+            printf("Expected ';' at line %zu\n",
+                    p->tokens[p->pos].line);
+            exit(1);
+        }
+        p->pos++;
+        return retstmt;
+    } else {
+        Stmt exprstmt = parse_exprstmt(p);
+        return exprstmt;
+    }
 }
 
 Stmt parse_funcstmt(Parser *p)
@@ -495,8 +527,8 @@ Stmt parse_funcstmt(Parser *p)
 
         return stmt;
     } else {
-        Stmt exprstmt = parse_exprstmt(p);
-        return exprstmt;
+        Stmt retstmt = parse_retstmt(p);
+        return retstmt;
     }
 }
 
@@ -694,6 +726,9 @@ void print_stmt(Stmt stmt)
         print_expr(stmt.as->exprstmt.expr);
         printf(";\n");
         break;
+    case S_RET:
+        printf("return");
+        print_expr(stmt.as->retstmt.expr);
     }
 }
 
@@ -736,6 +771,9 @@ void stmt_free(Stmt stmt)
     }
     case S_EXPR:
         expr_free(stmt.as->exprstmt.expr);
+        break;
+    case S_RET:
+        expr_free(stmt.as->retstmt.expr);
         break;
     }
     free(stmt.as);

@@ -81,8 +81,9 @@ typedef enum {
     S_FOR,
     S_WHILE,
     S_BLOCK,
-    S_FUNC,
     S_EXPR,
+    S_FUNC,
+    S_RET,
 } StmtType;
 
 typedef union anystmt AnyStmt;
@@ -132,6 +133,10 @@ typedef struct {
 } Args;
 
 typedef struct {
+    Expr expr;
+} ExprStmt;
+
+typedef struct {
     Token name;
     Args args;
     Block block;
@@ -139,7 +144,7 @@ typedef struct {
 
 typedef struct {
     Expr expr;
-} ExprStmt;
+} RetStmt;
 
 // Single dinamically allocated struct
 typedef union anystmt {
@@ -148,16 +153,19 @@ typedef union anystmt {
     ForStmt forstmt;
     WhileStmt whilestmt;
     BlockStmt blockstmt;
-    FuncStmt funcstmt;
     ExprStmt exprstmt;
+    FuncStmt funcstmt;
+    RetStmt retstmt;
 } AnyStmt;
 
 Stmt make_letstmt(Token name, Expr value);
 Stmt make_ifstmt(Expr cond, Stmt thenb, Stmt elseb);
 Stmt make_forstmt(Expr init, Expr step, Expr cond, Stmt thenb);
 Stmt make_whilestmt(Expr cond, Stmt thenb);
-Stmt make_exprstmt(Expr expr);
 Stmt make_blockstmt(Block block);
+Stmt make_exprstmt(Expr expr);
+Stmt make_retstmt(Expr expr);
+Stmt parse_retstmt(Parser *p);
 Stmt parse_exprstmt(Parser *p);
 Stmt parse_blockstmt(Parser *p);
 Stmt parse_whilestmt(Parser *p);
