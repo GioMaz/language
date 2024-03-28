@@ -16,4 +16,4 @@ run: codegen
 	./codegen code.l
 
 clean:
-	rm -rf *.o interpreter analyzer
+	rm -rf *.o interpreter codegen

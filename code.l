@@ -1,5 +1,13 @@
+// let a = 420;
+// a = 69;
+// return a;
+
 let a = 69;
-return a;
+if a < 20 {
+    return a + 1;
+} else {
+    return a - 1;
+}
 
 // let n = 12;
 // let n1 = 1;
