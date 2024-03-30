@@ -2,11 +2,11 @@
 // a = 69;
 // return a;
 
-let a = 69;
+let a = 68;
 if a < 20 {
-    return a + 1;
+    return a+1;
 } else {
-    return a - 1;
+    return a-1;
 }
 
 // let n = 12;

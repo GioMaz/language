@@ -29,8 +29,33 @@ typedef struct nvalues {
 
 typedef struct {
     LLVMBuilderRef builder;
-    NamedValues nvalues;
+    NamedValues *nvalues;
 } Codegen;
+
+NvNode *nvnode_update(NvNode *node, char *name, LLVMValueRef value)
+{
+    if (node) {
+        int cmp = strcmp(name, node->name);
+        if (cmp < 0) {
+            node->left = nvnode_update(node->left, name, value);
+            return node;
+        } else if (cmp > 0) {
+            node->right = nvnode_update(node->right, name, value);
+            return node;
+        } else {
+            node->value = value;
+            return node;
+        }
+    } else {
+        printf("Name %s is not defined\n", name);
+        exit(1);
+    }
+}
+
+void nv_update(NamedValues *nvalues, char *name, LLVMValueRef value)
+{
+    nvalues->root = nvnode_update(nvalues->root, name, value);
+}
 
 NvNode *nvnode_insert(NvNode *node, char *name, LLVMValueRef value)
 {
@@ -123,11 +148,18 @@ LLVMValueRef gen_binexpr(Codegen *codegen, BinExpr binexpr)
     }
     case T_EQUAL: {
         if (binexpr.lexpr.type != TERMINAL) {
-            printf("Bro\n");
+            printf("Expression ");
+            print_expr(binexpr.lexpr);
+            printf(" is not an lvalue\n");
             exit(1);
         }
-        Token ltok = binexpr.lexpr.as->termexpr.term;
-        LLVMValueRef lvalue = nv_lookup(&codegen->nvalues, ltok.data);
+
+        // Since mutable variables are stored in the stack we
+        // need the store instruction to perform the assignment
+        Token name = binexpr.lexpr.as->termexpr.term;
+        LLVMValueRef lvalue = nv_lookup(codegen->nvalues, name.data);
+        LLVMValueRef rvalue = gen_expr(codegen, binexpr.rexpr);
+        return LLVMBuildStore(codegen->builder, rvalue, lvalue);
     }
     default:
         printf("Token '");
@@ -145,7 +177,11 @@ LLVMValueRef gen_termexpr(Codegen *codegen, TermExpr termexpr)
         return LLVMConstReal(LLVMDoubleType(), value);
     }
     case T_NAME: {
-        return nv_lookup(&codegen->nvalues, termexpr.term.data);
+        // Mutable variables are stored as a pointers to the stack
+        // (alloca instruction) so we need to load them with the load
+        // instruction
+        LLVMValueRef ptr = nv_lookup(codegen->nvalues, termexpr.term.data);
+        return LLVMBuildLoad2(codegen->builder, LLVMGetAllocatedType(ptr), ptr, termexpr.term.data);
     }
     default:
         printf("Could not evaluate '");
@@ -177,15 +213,19 @@ LLVMValueRef gen_expr(Codegen *codegen, Expr expr)
 void gen_retstmt(Codegen *codegen, RetStmt retstmt)
 {
     LLVMValueRef value = gen_expr(codegen, retstmt.expr);
-    LLVMBuildRet(codegen->builder, value);
+    LLVMValueRef ret_value = LLVMBuildCast(codegen->builder, LLVMFPToUI, value, LLVMInt32Type(), "rettmp");
+    LLVMBuildRet(codegen->builder, ret_value);
 }
 
 void gen_stmt(Codegen *codegen, Stmt stmt);
 
+// Mutable variable definitions need to be done with stack allocation
+// (alloca and store instructions)
 void gen_letstmt(Codegen *codegen, LetStmt letstmt)
 {
-    LLVMValueRef value = gen_expr(codegen, letstmt.value);
-    nv_insert(&codegen->nvalues, letstmt.name.data, value);
+    LLVMValueRef ptr = LLVMBuildAlloca(codegen->builder, LLVMDoubleType(), letstmt.name.data);
+    LLVMBuildStore(codegen->builder, gen_expr(codegen, letstmt.value), ptr);
+    nv_insert(codegen->nvalues, letstmt.name.data, ptr);
 }
 
 void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
@@ -267,7 +307,7 @@ void gen_stmt(Codegen *codegen, Stmt stmt)
 
 void gen_main(LLVMModuleRef module, LLVMBuilderRef builder, Program program)
 {
-    LLVMTypeRef main_proto = LLVMFunctionType(LLVMDoubleType(), NULL, 0, false);
+    LLVMTypeRef main_proto = LLVMFunctionType(LLVMInt32Type(), NULL, 0, false);
     LLVMValueRef main_func = LLVMAddFunction(module, "main", main_proto);
     LLVMBasicBlockRef bb = LLVMAppendBasicBlock(main_func, "entry");
     LLVMPositionBuilderAtEnd(builder, bb);
@@ -275,14 +315,14 @@ void gen_main(LLVMModuleRef module, LLVMBuilderRef builder, Program program)
     NamedValues nvalues = { 0 };
     Codegen codegen = {
         .builder = builder,
-        .nvalues = nvalues,
+        .nvalues = &nvalues,
     };
 
     for (size_t i = 0; i < program.size; i++) {
         gen_stmt(&codegen, program.items[i]);
     }
 
-    LLVMBuildRet(builder, LLVMConstReal(LLVMDoubleType(), 0));
+    LLVMBuildRet(builder, LLVMConstInt(LLVMInt32Type(), 0, false));
 }
 
 int main(int argc, char **argv)
