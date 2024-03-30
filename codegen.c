@@ -219,8 +219,25 @@ void gen_retstmt(Codegen *codegen, RetStmt retstmt)
 
 void gen_stmt(Codegen *codegen, Stmt stmt);
 
-// Mutable variable definitions need to be done with stack allocation
-// (alloca and store instructions)
+// STACK ALLOCATION
+// Mutable variable definitions need to be done with stack allocation.
+// The 'alloca' instruction returns a pointer to the stack and the
+// 'store' instruction takes a pointer to the stack and returns the
+// corrispondent value.
+// LLVM does not perform versioning on the objects allocated in
+// the memory.
+//
+// REGISTER ALLOCATION
+// Immutable variables can instead be allocated in the unlimited file register.
+// LLVM does perform versioning on the objects allocated inside registers.
+// 
+// OPTIMIZATION
+// Since memory accesses are slow the mem2reg optimization pass is needed
+// to convert from 'alloca' memory allocation to register allocation and the
+// 'phi' instruction.
+//
+// To see the optimization run:
+// cat prova.ll | llvm-as | opt -passes=mem2reg | llvm-dis
 void gen_letstmt(Codegen *codegen, LetStmt letstmt)
 {
     LLVMValueRef ptr = LLVMBuildAlloca(codegen->builder, LLVMDoubleType(), letstmt.name.data);
@@ -230,7 +247,7 @@ void gen_letstmt(Codegen *codegen, LetStmt letstmt)
 
 void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 {
-    // If
+    // Cond
     LLVMValueRef cond = gen_expr(codegen, ifstmt.cond);
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
     LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
@@ -259,7 +276,23 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 
 void gen_forstmt(Codegen *codegen, ForStmt forstmt)
 {
-    LLVMValueRef init = gen_expr(codegen, forstmt.init);
+    // // Init
+    // LLVMValueRef init = gen_expr(codegen, forstmt.init);
+    // LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
+    // LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
+    // LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
+    // LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
+    // LLVMBuildBr(codegen->builder, loop);
+    // LLVMPositionBuilderAtEnd(codegen->builder, loop);
+
+    // // Loop
+    // LLVMValueRef cond = gen_expr(codegen, forstmt.cond);
+    // gen_expr(codegen, forstmt.step);
+    // LLVMBuildCondBr(codegen->builder, cond, loop, end);
+    // gen_stmt(codegen, forstmt.thenb);
+    // LLVMBuildBr(codegen->builder, loop);
+
+    // LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
 void gen_blockstmt(Codegen *codegen, BlockStmt blockstmt)
@@ -348,8 +381,6 @@ int main(int argc, char **argv)
     LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
 
     gen_main(module, builder, pr);
-    // LLVMValueRef value = gen_expr(builder, pr.items[0].as->letstmt.value);
-    // LLVMBuildRet(builder, value);
 
     print_module(module);
 

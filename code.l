@@ -1,13 +1,14 @@
-// let a = 420;
-// a = 69;
-// return a;
-
-let a = 68;
-if a < 20 {
-    return a+1;
-} else {
-    return a-1;
+let i = 0;
+for i = 0; i < 21; i = i + 1 {
 }
+return i;
+
+// let a = 68;
+// if a < 20 {
+//     return a+1;
+// } else {
+//     return a-1;
+// }
 
 // let n = 12;
 // let n1 = 1;
