@@ -10,7 +10,8 @@
 void print_module(LLVMModuleRef module)
 {
     char *ir = LLVMPrintModuleToString(module);
-    printf("=== START IR ===\n%s==== END IR ====\n", ir);
+    // printf("=== START IR ===\n%s==== END IR ====\n", ir);
+    printf("%s\n", ir);
     free(ir);
 }
 
@@ -276,23 +277,23 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 
 void gen_forstmt(Codegen *codegen, ForStmt forstmt)
 {
-    // // Init
-    // LLVMValueRef init = gen_expr(codegen, forstmt.init);
-    // LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
-    // LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
-    // LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
-    // LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
-    // LLVMBuildBr(codegen->builder, loop);
-    // LLVMPositionBuilderAtEnd(codegen->builder, loop);
+    // Init
+    LLVMValueRef init = gen_expr(codegen, forstmt.init);
+    LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
+    LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
+    LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
+    LLVMValueRef cond1 = gen_expr(codegen, forstmt.cond);
+    LLVMBuildCondBr(codegen->builder, cond1, loop, end);
+    LLVMPositionBuilderAtEnd(codegen->builder, loop);
 
-    // // Loop
-    // LLVMValueRef cond = gen_expr(codegen, forstmt.cond);
-    // gen_expr(codegen, forstmt.step);
-    // LLVMBuildCondBr(codegen->builder, cond, loop, end);
-    // gen_stmt(codegen, forstmt.thenb);
-    // LLVMBuildBr(codegen->builder, loop);
-
-    // LLVMPositionBuilderAtEnd(codegen->builder, end);
+    // Loop
+    gen_stmt(codegen, forstmt.thenb);
+    gen_expr(codegen, forstmt.step);
+    LLVMValueRef cond2 = gen_expr(codegen, forstmt.cond);
+    LLVMBuildCondBr(codegen->builder, cond2, loop, end);
+    LLVMBuildBr(codegen->builder, loop);
+    LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
 void gen_blockstmt(Codegen *codegen, BlockStmt blockstmt)

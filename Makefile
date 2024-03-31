@@ -13,7 +13,9 @@ codegen: codegen.o analyzer.o parser.o lexer.o
 #	./interpreter code.l
 
 run: codegen
-	./codegen code.l
+	# ./codegen code.l
+	# ./codegen code.l | llvm-as | opt -passes=mem2reg | llvm-dis
+	./codegen code.l | lli ; echo $$?
 
 clean:
 	rm -rf *.o interpreter codegen

@@ -1,7 +1,13 @@
+let n = 9;
+let n1 = 0;
+let n2 = 1;
 let i = 0;
-for i = 0; i < 21; i = i + 1 {
+for i = 0; i < n; i = i + 1 {
+    let tmp = n2;
+    n2 = n2 + n1;
+    n1 = tmp;
 }
-return i;
+return n2;
 
 // let a = 68;
 // if a < 20 {
@@ -9,17 +15,6 @@ return i;
 // } else {
 //     return a-1;
 // }
-
-// let n = 12;
-// let n1 = 1;
-// let n2 = 1;
-// let i = 0;
-// for i = 2; i < n; i = i + 1 {
-//     let tmp = n1;
-//     n1 = n2;
-//     n2 = tmp + n2;
-// }
-// let res = (n1 + n2) / n;
 
 // let a = 1 + 69 / 12 * (62 - 17);
 
