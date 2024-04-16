@@ -1,13 +1,21 @@
-let n = 9;
-let n1 = 0;
-let n2 = 1;
-let i = 0;
-for i = 0; i < n; i = i + 1 {
-    let tmp = n2;
-    n2 = n2 + n1;
-    n1 = tmp;
+let a = 20;
+let res = 0;
+while a = a - 1 {
+    let ciao = 69;
+    res = res + 2;
 }
-return n2;
+return res;
+
+// let n = 9;
+// let n1 = 0;
+// let n2 = 1;
+// let i = 0;
+// for i = 0; i < n; i = i + 1 {
+//     let tmp = n2;
+//     n2 = n2 + n1;
+//     n1 = tmp;
+// }
+// return n2;
 
 // let a = 68;
 // if a < 20 {

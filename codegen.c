@@ -3,9 +3,10 @@
 
 #include "llvm-c/Core.h"
 
-#include "vector.h"
 #include "lexer.h"
 #include "parser.h"
+#include "codegen.h"
+#include "vector.h"
 
 void print_module(LLVMModuleRef module)
 {
@@ -13,49 +14,6 @@ void print_module(LLVMModuleRef module)
     // printf("=== START IR ===\n%s==== END IR ====\n", ir);
     printf("%s\n", ir);
     free(ir);
-}
-
-typedef struct nvnode NvNode;
-typedef struct nvnode {
-    char *name;
-    LLVMValueRef value;
-    NvNode *left;
-    NvNode *right;
-} NVNode;
-
-typedef struct nvalues NamedValues;
-typedef struct nvalues {
-    NvNode *root;
-} NamedValues;
-
-typedef struct {
-    LLVMBuilderRef builder;
-    NamedValues *nvalues;
-} Codegen;
-
-NvNode *nvnode_update(NvNode *node, char *name, LLVMValueRef value)
-{
-    if (node) {
-        int cmp = strcmp(name, node->name);
-        if (cmp < 0) {
-            node->left = nvnode_update(node->left, name, value);
-            return node;
-        } else if (cmp > 0) {
-            node->right = nvnode_update(node->right, name, value);
-            return node;
-        } else {
-            node->value = value;
-            return node;
-        }
-    } else {
-        printf("Name %s is not defined\n", name);
-        exit(1);
-    }
-}
-
-void nv_update(NamedValues *nvalues, char *name, LLVMValueRef value)
-{
-    nvalues->root = nvnode_update(nvalues->root, name, value);
 }
 
 NvNode *nvnode_insert(NvNode *node, char *name, LLVMValueRef value)
@@ -107,8 +65,6 @@ LLVMValueRef nv_lookup(NamedValues *nvalues, char *name)
 {
     return nvnode_lookup(nvalues->root, name)->value;
 }
-
-LLVMValueRef gen_expr(Codegen *codegen, Expr expr);
 
 LLVMValueRef gen_unexpr(Codegen *codegen, UnExpr unexpr)
 {
@@ -218,8 +174,6 @@ void gen_retstmt(Codegen *codegen, RetStmt retstmt)
     LLVMBuildRet(codegen->builder, ret_value);
 }
 
-void gen_stmt(Codegen *codegen, Stmt stmt);
-
 // STACK ALLOCATION
 // Mutable variable definitions need to be done with stack allocation.
 // The 'alloca' instruction returns a pointer to the stack and the
@@ -231,7 +185,7 @@ void gen_stmt(Codegen *codegen, Stmt stmt);
 // REGISTER ALLOCATION
 // Immutable variables can instead be allocated in the unlimited file register.
 // LLVM does perform versioning on the objects allocated inside registers.
-// 
+//
 // OPTIMIZATION
 // Since memory accesses are slow the mem2reg optimization pass is needed
 // to convert from 'alloca' memory allocation to register allocation and the
@@ -346,7 +300,7 @@ void gen_main(LLVMModuleRef module, LLVMBuilderRef builder, Program program)
     LLVMBasicBlockRef bb = LLVMAppendBasicBlock(main_func, "entry");
     LLVMPositionBuilderAtEnd(builder, bb);
 
-    NamedValues nvalues = { 0 };
+    NamedValues nvalues = {0};
     Codegen codegen = {
         .builder = builder,
         .nvalues = &nvalues,

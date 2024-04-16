@@ -419,10 +419,8 @@ int main(int argc, char **argv)
     Parser p;
     parser_init(&p, &l);
     Program pr = parse_program(&p);
-    // print_program(&pr);
 
     // Evaluate
-    Stmt firststmt = pr.items[0];
     eval_program(&pr);
 
     // Free memory
