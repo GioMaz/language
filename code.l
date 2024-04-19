@@ -1,10 +1,21 @@
 let a = 20;
-let res = 0;
-while a = a - 1 {
-    let ciao = 69;
-    res = res + 2;
+while a > 0 {
+    a = a - 1;
 }
-return res;
+return a;
+
+// let a = 2;
+// for a = 2; a < 20; a = a + 1 {
+//     let tmp = 69;
+// }
+
+// let a = 20;
+// let res = 0;
+// while a = a - 1 {
+//     let ciao = 69;
+//     res = res + 2;
+// }
+// return res;
 
 // let n = 9;
 // let n1 = 0;

@@ -246,7 +246,25 @@ void gen_forstmt(Codegen *codegen, ForStmt forstmt)
     gen_expr(codegen, forstmt.step);
     LLVMValueRef cond2 = gen_expr(codegen, forstmt.cond);
     LLVMBuildCondBr(codegen->builder, cond2, loop, end);
-    LLVMBuildBr(codegen->builder, loop);
+    // LLVMBuildBr(codegen->builder, loop);
+    LLVMPositionBuilderAtEnd(codegen->builder, end);
+}
+
+void gen_whilestmt(Codegen *codegen, WhileStmt whilestmt)
+{
+    // Init
+    LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
+    LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
+    LLVMValueRef cond1 = gen_expr(codegen, whilestmt.cond);
+    LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
+    LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
+    LLVMBuildCondBr(codegen->builder, cond1, loop, end);
+    LLVMPositionBuilderAtEnd(codegen->builder, loop);
+
+    // Loop
+    gen_stmt(codegen, whilestmt.thenb);
+    LLVMValueRef cond2 = gen_expr(codegen, whilestmt.cond);
+    LLVMBuildCondBr(codegen->builder, cond2, loop, end);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
@@ -276,7 +294,7 @@ void gen_stmt(Codegen *codegen, Stmt stmt)
         gen_forstmt(codegen, stmt.as->forstmt);
         break;
     case S_WHILE:
-        printf("WHILE\n");
+        gen_whilestmt(codegen, stmt.as->whilestmt);
         break;
     case S_BLOCK:
         gen_blockstmt(codegen, stmt.as->blockstmt);
@@ -285,7 +303,8 @@ void gen_stmt(Codegen *codegen, Stmt stmt)
         gen_exprstmt(codegen, stmt.as->exprstmt);
         break;
     case S_FUNC:
-        printf("FUNC\n");
+        printf("Functions are not implemented\n");
+        exit(1);
         break;
     case S_RET:
         gen_retstmt(codegen, stmt.as->retstmt);
