@@ -68,12 +68,13 @@ LLVMValueRef nv_lookup(NamedValues *nvalues, char *name)
 
 LLVMValueRef gen_unexpr(Codegen *codegen, UnExpr unexpr)
 {
+    // printf("UNEXPR\n");
     LLVMValueRef value = gen_expr(codegen, unexpr.expr);
     switch (unexpr.op.type) {
     case T_BANG:
-        return LLVMBuildNeg(codegen->builder, value, "negtmp");
+        return LLVMBuildNot(codegen->builder, value, "negtmp");
     case T_MINUS:
-        return LLVMBuildNeg(codegen->builder, value, "negtmp");
+        return LLVMBuildFNeg(codegen->builder, value, "negtmp");
     default:
         printf("Token '");
         print_token(unexpr.op);
@@ -132,6 +133,12 @@ LLVMValueRef gen_termexpr(Codegen *codegen, TermExpr termexpr)
     case T_DOUBLE: {
         double value = get_ddata(termexpr.term);
         return LLVMConstReal(LLVMDoubleType(), value);
+    }
+    case T_TRUE: {
+        return LLVMConstInt(LLVMIntType(1), 1, false);
+    }
+    case T_FALSE: {
+        return LLVMConstInt(LLVMIntType(1), 0, false);
     }
     case T_NAME: {
         // Mutable variables are stored as a pointers to the stack
@@ -204,6 +211,8 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 {
     // Cond
     LLVMValueRef cond = gen_expr(codegen, ifstmt.cond);
+    LLVMValueRef cond_cast = LLVMBuildFCmp(codegen->builder, LLVMRealUNE, cond, 
+            LLVMConstReal(LLVMDoubleType(), 0), "cond_cast"); // Acts like a cast to i1
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
     LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
 
@@ -225,7 +234,7 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
     LLVMBuildBr(codegen->builder, end);
 
     LLVMPositionBuilderAtEnd(codegen->builder, bb);
-    LLVMValueRef br = LLVMBuildCondBr(codegen->builder, cond, thenb, elseb);
+    LLVMValueRef br = LLVMBuildCondBr(codegen->builder, cond_cast, thenb, elseb);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
@@ -246,7 +255,6 @@ void gen_forstmt(Codegen *codegen, ForStmt forstmt)
     gen_expr(codegen, forstmt.step);
     LLVMValueRef cond2 = gen_expr(codegen, forstmt.cond);
     LLVMBuildCondBr(codegen->builder, cond2, loop, end);
-    // LLVMBuildBr(codegen->builder, loop);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 

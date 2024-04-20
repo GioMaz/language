@@ -1,13 +1,21 @@
-let a = 20;
-while a > 0 {
-    a = a - 1;
+let a = !false;
+let res = 68;
+if a {
+    res = res + 1;
 }
-return a;
+return res;
+
+// let a = 20;
+// while a > -1 {
+//     a = a - 1;
+// }
+// return a;
 
 // let a = 2;
 // for a = 2; a < 20; a = a + 1 {
 //     let tmp = 69;
 // }
+// return a;
 
 // let a = 20;
 // let res = 0;
