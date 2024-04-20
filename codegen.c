@@ -211,8 +211,7 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 {
     // Cond
     LLVMValueRef cond = gen_expr(codegen, ifstmt.cond);
-    LLVMValueRef cond_cast = LLVMBuildFCmp(codegen->builder, LLVMRealUNE, cond, 
-            LLVMConstReal(LLVMDoubleType(), 0), "cond_cast"); // Acts like a cast to i1
+    LLVMValueRef intcond = LLVMBuildFPToUI(codegen->builder, cond, LLVMInt1Type(), "intcond");
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
     LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
 
@@ -234,7 +233,7 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
     LLVMBuildBr(codegen->builder, end);
 
     LLVMPositionBuilderAtEnd(codegen->builder, bb);
-    LLVMValueRef br = LLVMBuildCondBr(codegen->builder, cond_cast, thenb, elseb);
+    LLVMValueRef br = LLVMBuildCondBr(codegen->builder, intcond, thenb, elseb);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
@@ -247,14 +246,18 @@ void gen_forstmt(Codegen *codegen, ForStmt forstmt)
     LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
     LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
     LLVMValueRef cond1 = gen_expr(codegen, forstmt.cond);
-    LLVMBuildCondBr(codegen->builder, cond1, loop, end);
+    LLVMValueRef intcond1 = LLVMBuildFPToUI(codegen->builder, cond1,
+        LLVMInt1Type(), "intcond1");
+    LLVMBuildCondBr(codegen->builder, intcond1, loop, end);
     LLVMPositionBuilderAtEnd(codegen->builder, loop);
 
     // Loop
     gen_stmt(codegen, forstmt.thenb);
     gen_expr(codegen, forstmt.step);
     LLVMValueRef cond2 = gen_expr(codegen, forstmt.cond);
-    LLVMBuildCondBr(codegen->builder, cond2, loop, end);
+    LLVMValueRef intcond2 = LLVMBuildFPToUI(codegen->builder, cond2,
+        LLVMInt1Type(), "intcond2");
+    LLVMBuildCondBr(codegen->builder, intcond2, loop, end);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 
@@ -264,15 +267,19 @@ void gen_whilestmt(Codegen *codegen, WhileStmt whilestmt)
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
     LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
     LLVMValueRef cond1 = gen_expr(codegen, whilestmt.cond);
+    LLVMValueRef intcond1 = LLVMBuildFPToUI(codegen->builder, cond1,
+        LLVMInt1Type(), "intcond1");
     LLVMBasicBlockRef loop = LLVMAppendBasicBlock(parent, "loop");
     LLVMBasicBlockRef end = LLVMAppendBasicBlock(parent, "end");
-    LLVMBuildCondBr(codegen->builder, cond1, loop, end);
+    LLVMBuildCondBr(codegen->builder, intcond1, loop, end);
     LLVMPositionBuilderAtEnd(codegen->builder, loop);
 
     // Loop
     gen_stmt(codegen, whilestmt.thenb);
     LLVMValueRef cond2 = gen_expr(codegen, whilestmt.cond);
-    LLVMBuildCondBr(codegen->builder, cond2, loop, end);
+    LLVMValueRef intcond2 = LLVMBuildFPToUI(codegen->builder, cond2,
+        LLVMInt1Type(), "intcond2");
+    LLVMBuildCondBr(codegen->builder, intcond2, loop, end);
     LLVMPositionBuilderAtEnd(codegen->builder, end);
 }
 

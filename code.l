@@ -1,9 +1,20 @@
-let a = !false;
-let res = 68;
-if a {
-    res = res + 1;
-}
-return res;
+// let a = 69;
+// if a {
+//     return a;
+// } else {
+//     return 420;
+// }
+
+// let a = !false;
+// let res = 68;
+// if a {
+//     res = res + 1;
+// }
+// return res;
+
+// while 12 {
+//     return 69;
+// }
 
 // let a = 20;
 // while a > -1 {
@@ -16,6 +27,10 @@ return res;
 //     let tmp = 69;
 // }
 // return a;
+
+// for 1; 2; 3 {
+//     return 69;
+// }
 
 // let a = 20;
 // let res = 0;
