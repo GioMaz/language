@@ -211,7 +211,8 @@ void gen_ifstmt(Codegen *codegen, IfStmt ifstmt)
 {
     // Cond
     LLVMValueRef cond = gen_expr(codegen, ifstmt.cond);
-    LLVMValueRef intcond = LLVMBuildFPToUI(codegen->builder, cond, LLVMInt1Type(), "intcond");
+    LLVMValueRef intcond = LLVMBuildFPToUI(codegen->builder, cond,
+        LLVMInt1Type(), "intcond");
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(codegen->builder);
     LLVMValueRef parent = LLVMGetBasicBlockParent(bb);
 

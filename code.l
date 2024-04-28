@@ -1,3 +1,11 @@
+let n = 5;
+let res = 1;
+while n > 0 {
+    res = res * n;
+    n = n - 1;
+}
+return res;
+
 // let a = 69;
 // if a {
 //     return a;
@@ -64,4 +72,5 @@
 //     let a = 2;
 //     let b = 3;
 //     let c = a + b;
+//     return c + 1;
 // }
