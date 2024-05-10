@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS= $$(llvm-config --cflags --ldflags --libs core)
+CFLAGS=
+LLVM_CFLAGS= $$(llvm-config --cflags --ldflags --libs core)
 
 all: interpreter codegen
 
@@ -7,7 +8,7 @@ interpreter: interpreter.o parser.o lexer.o
 	$(CC) $(CFLAGS) -o interpreter interpreter.o parser.o lexer.o
 
 codegen: codegen.o analyzer.o parser.o lexer.o
-	$(CC) $(CFLAGS) -o codegen codegen.o analyzer.o parser.o lexer.o
+	$(CC) $(LLVM_CFLAGS) -o codegen codegen.o analyzer.o parser.o lexer.o
 
 #run: interpreter
 #	./interpreter code.l
