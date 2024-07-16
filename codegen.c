@@ -141,7 +141,7 @@ LLVMValueRef gen_termexpr(Codegen *codegen, TermExpr termexpr)
         return LLVMConstInt(LLVMIntType(1), 0, false);
     }
     case T_NAME: {
-        // Mutable variables are stored as a pointers to the stack
+        // Mutable variables are stored as pointers to the stack
         // (alloca instruction) so we need to load them with the load
         // instruction
         LLVMValueRef ptr = nv_lookup(codegen->nvalues, termexpr.term.data);
@@ -177,7 +177,8 @@ LLVMValueRef gen_expr(Codegen *codegen, Expr expr)
 void gen_retstmt(Codegen *codegen, RetStmt retstmt)
 {
     LLVMValueRef value = gen_expr(codegen, retstmt.expr);
-    LLVMValueRef ret_value = LLVMBuildCast(codegen->builder, LLVMFPToUI, value, LLVMInt32Type(), "rettmp");
+    LLVMValueRef ret_value = LLVMBuildCast(codegen->builder, LLVMFPToUI, value,
+        LLVMInt32Type(), "rettmp");
     LLVMBuildRet(codegen->builder, ret_value);
 }
 
@@ -350,9 +351,18 @@ void gen_main(LLVMModuleRef module, LLVMBuilderRef builder, Program program)
 
 int main(int argc, char **argv)
 {
+    if (argc < 2) {
+        printf("Usage: %s <source.l>\n", argv[0]);
+        exit(1);
+    }
+
     Buffer b;
     v_init(b);
-    FILE *f = fopen("code.l", "r");
+    FILE *f = fopen(argv[1], "r");
+    if (f == NULL) {
+        printf("Could not open file %s\n", argv[1]);
+        exit(1);
+    }
     get_content(f, &b);
 
     // Lex

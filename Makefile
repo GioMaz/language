@@ -8,6 +8,7 @@ OPT=opt-$(LLVMVERSION)
 CFLAGS=$$($(LLVMCONFIG) --cflags --ldflags --libs core)
 
 .INTERMEDIATE: interpreter.o parser.o lexer.o codegen.o analyzer.o
+.PHONY: run clean
 
 all: interpreter codegen
 

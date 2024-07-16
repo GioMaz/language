@@ -13,7 +13,6 @@ typedef struct nvnode {
     NvNode *right;
 } NVNode;
 
-typedef struct nvalues NamedValues;
 typedef struct nvalues {
     NvNode *root;
 } NamedValues;
