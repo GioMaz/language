@@ -1,5 +1,6 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
+
 #include "llvm-c/Core.h"
 
 void print_module(LLVMModuleRef module);
