@@ -24,5 +24,5 @@ comparison -> term ('<' | '>' | '<=' | '>=' term)*
 term -> factor ('+' | '-' factor)*
 factor -> unary ('*' | '/' unary)*
 unary -> (! | -)* terminal
-terminal -> (DOUBLE | STRING | NAME | groupexpr)
-groupexpr -> '(' expr ')'
+groupexpr -> '(' expr ')' | terminal
+terminal -> (DOUBLE | STRING | NAME | TRUE | FALSE)

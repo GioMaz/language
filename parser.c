@@ -313,8 +313,8 @@ Expr parse_assignment(Parser *p)
 // expression specifying precedence rules (* before +)
 // and associativity rules (left before right).
 //
-// The pseudocode for a recursive descent function is
-// the following:
+// The pseudocode for a BINARY EXPRESSION with
+// recursive descent function is the following:
 //
 // Expr parse_expr1(Parser *p)
 //   Expr expr = parse_expr2(p);
@@ -572,7 +572,7 @@ Stmt parse_whilestmt(Parser *p)
 Stmt parse_forstmt(Parser *p)
 {
     if (is_token(p, T_FOR)) {
-        p->pos++; 
+        p->pos++;
         Expr init = parse_expr(p);
 
         p->pos++;
@@ -800,21 +800,21 @@ void program_free(Program *p)
 //     v_init(b);
 //     FILE *f = fopen("./code.l", "r");
 //     get_content(f, &b);
-// 
+//
 //     Lexer l;
 //     lexer_init(&l, b.items);
 //     get_tokens(&l);
 //     // print_tokens(&l);
-// 
+//
 //     Parser p;
 //     parser_init(&p, &l);
 //     Program pr = parse_program(&p);
 //     print_program(&pr);
-// 
+//
 //     program_free(&pr); // Free statements and expressions
 //                        // (program)
 //     lexer_free(&l); // Free tokens (lexer and parser)
 //     free(b.items); // Free content buffer
-// 
+//
 //     return 0;
 // }

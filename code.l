@@ -1,10 +1,13 @@
-let n = 5;
-let res = 1;
-while n > 0 {
-    res = res * n;
-    n = n - 1;
-}
-return res;
+let iff = 69;
+return iff;
+
+// let n = 5;
+// let res = 1;
+// while n > 0 {
+//     res = res * n;
+//     n = n - 1;
+// }
+// return res;
 
 // let a = 69;
 // if a {
